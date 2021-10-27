@@ -65,7 +65,48 @@ const floorPriceByUrl = async (url, mode = "headless") => {
   return floorPrice;
 }
 
+/**
+ * Extracts an array of the lowest prices for a given collection. Some remarks:
+ * - returns an array of floorPrice objects
+ * - only considers ETH values (ignoring other currency)
+ * - returns maximum 32 objects
+ * - fetches the data not from the card, but from the __wired__ variable
+ * - is an alternative way of getting the same info
+ */
+const floorPrices = async (slug, mode = "headless") => {
+  const browser = await puppeteer.launch({
+    headless: mode === "debug" ? false : true,
+    args: ['--start-maximized'],
+  });
+
+  const page = await browser.newPage();
+  const url = `https://opensea.io/collection/${slug}?search[sortAscending]=true&search[sortBy]=PRICE&search[toggles][0]=BUY_NOW`;
+  await page.goto(url);
+
+  // ...🚧 waiting for cloudflare to resolve
+  await page.waitForSelector('.cf-browser-verification', {hidden: true});
+
+  // extract floor prices from __wired__ variable
+  return await page.evaluate(() => {
+    try {
+      return Object.values(__wired__.records)
+        .filter(o => o.__typename === "AssetQuantityType")
+        .filter(o => o.quantityInEth)
+        .map(o => {
+          return {
+            amount: o.quantity / 1000000000000000000,
+            currency: "ETH",
+          }
+        });
+    } catch (err) {
+      console.log(err);
+      return undefined;
+    }
+  })
+};
+
 module.exports = {
   floorPrice,
-  floorPriceByUrl
+  floorPriceByUrl,
+  floorPrices
 }
