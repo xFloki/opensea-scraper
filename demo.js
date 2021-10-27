@@ -23,6 +23,13 @@ console.log(`===>>> ${slug} <<<===`);
   const floorPriceByUrl = await OpenseaScraper.floorPriceByUrl("https://opensea.io/collection/sandbox?search[sortAscending]=true&search[sortBy]=PRICE&search[stringTraits][0][name]=Type&search[stringTraits][0][values][0]=Land&search[toggles][0]=BUY_NOW");
   console.dir(floorPriceByUrl, {depth: null});
 
+  // get floor prices (array)
+  console.log(`\n\n\n\n✅ === OpenseaScraper.floorPrices(slug) ===`);
+  console.log("scraping floor prices with a different method (not scraping the cards, but getting it from the __wired__ object)")
+  const floorPrices = await OpenseaScraper.floorPrices("https://opensea.io/collection/sandbox?search[sortAscending]=true&search[sortBy]=PRICE&search[stringTraits][0][name]=Type&search[stringTraits][0][values][0]=Land&search[toggles][0]=BUY_NOW");
+  console.log("scraped floor prices (shows only first 3):")
+  console.dir(floorPrices.slice(0,3), {depth: null});
+
   // get offers
   console.log(`\n\n\n\n✅ === OpenseaScraper.offers(slug, resultSize) ===`);
   let resultSize = 3;
